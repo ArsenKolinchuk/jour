@@ -1,5 +1,3 @@
-
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -58,25 +56,32 @@ class Exit extends JPanel {
         loginButton.setBounds(284, 143, 150, 30);
         centerPanel.add(loginButton);
 
-      
+        // ActionListener для кнопки входу
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String email = emailField.getText();
                 String password = new String(passwordField.getPassword());
 
-                
                 if (email.equals("admin") && password.equals("admin")) {
-                    
                     JFrame adminFrame = new JFrame("Admin Panel");
                     adminFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    adminFrame.getContentPane().add(new Admin()); 
+                    adminFrame.getContentPane().add(new Admin());
                     adminFrame.setSize(820, 600);
+                    adminFrame.setLocationRelativeTo(null);
                     adminFrame.setVisible(true);
+
                     
                     SwingUtilities.getWindowAncestor(Exit.this).dispose();
-                } else {
-                    
+                } else if(email.equals("1") && password.equals("1")){
+                	JFrame curatorFrame = new JFrame("Curator Panel");
+                	curatorFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                	curatorFrame.getContentPane().add(new CuratorPage());
+                	curatorFrame.setSize(820, 600);
+                	curatorFrame.setLocationRelativeTo(null);
+                	curatorFrame.setVisible(true);
+                } else                
+                {
                     JOptionPane.showMessageDialog(Exit.this, "Неправильний логін або пароль.", "Помилка", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -88,6 +93,9 @@ class Exit extends JPanel {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(new Exit());
         frame.pack();
+        frame.setLocationRelativeTo(null); // Центрування вікна на екрані
         frame.setVisible(true);
     }
 }
+
+

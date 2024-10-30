@@ -13,15 +13,14 @@ public class Main extends JFrame {
     private JPanel contentPane;
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-                Main frame = new Main();
-                frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        JFrame frame = new JFrame("Login");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(new Exit());
+        frame.pack();
+        frame.setLocationRelativeTo(null); // Центрування вікна на екрані
+        frame.setVisible(true);
     }
+
 
     public Main() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

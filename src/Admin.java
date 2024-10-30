@@ -87,12 +87,11 @@ public class Admin extends JPanel {
         groupPanel.setLayout(null);
 
         String[] groupColumnNames = {"Група"};
-        DefaultTableModel groupTableModel = new DefaultTableModel(groupColumnNames, 0);
+        groupTableModel = new DefaultTableModel(groupColumnNames, 0);
 
-        this.groupTableModel = new DefaultTableModel(groupColumnNames, 0);
-        this.groupTable = new JTable(this.groupTableModel);
+        groupTable = new JTable(groupTableModel);
 
-        JScrollPane groupTableScrollPane = new JScrollPane(this.groupTable);
+        JScrollPane groupTableScrollPane = new JScrollPane(groupTable);
         groupTableScrollPane.setBounds(37, 33, 314, 235);
         groupPanel.add(groupTableScrollPane);
 
@@ -106,11 +105,7 @@ public class Admin extends JPanel {
         groupPanel.add(groupField);
 
         JButton addGroupButton = new JButton("Додати");
-        addGroupButton.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		groupAdd();
-        	}
-        });
+        addGroupButton.addActionListener(e -> groupAdd());
         addGroupButton.setBounds(37, 346, 100, 40);
         groupPanel.add(addGroupButton);
 
@@ -119,11 +114,7 @@ public class Admin extends JPanel {
         groupPanel.add(updateGroupButton);
 
         JButton deleteGroupButton = new JButton("Видалити");
-        deleteGroupButton.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		deleteGroup();
-        	}
-        });
+        deleteGroupButton.addActionListener(e -> deleteGroup());
         deleteGroupButton.setBounds(260, 346, 100, 40);
         groupPanel.add(deleteGroupButton);
 
@@ -176,6 +167,11 @@ public class Admin extends JPanel {
         String name = nameField.getText();
         String patronymic = patronymicField.getText();
 
+        if (surname.isEmpty() || name.isEmpty() || patronymic.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Будь ласка, заповніть всі поля для додавання куратора");
+            return;
+        }
+
         try {
             Connection con = DBConnection.getConnection();
             String sql = "INSERT INTO curator (surname, name, bat) VALUES (?, ?, ?)";
@@ -199,59 +195,43 @@ public class Admin extends JPanel {
 
     public void deleteCurator() {
         int selectedRow = table.getSelectedRow();
-        if (selectedRow != -1) {
-            String surname = table.getValueAt(selectedRow, 0).toString(); 
-            String name = table.getValueAt(selectedRow, 1).toString(); 
-            String patronymic = table.getValueAt(selectedRow, 2).toString(); 
-            try {
-                Connection con = DBConnection.getConnection();
-                String sql = "DELETE FROM curator WHERE surname = ? AND name = ? AND bat = ?";
-                PreparedStatement pst = con.prepareStatement(sql);
-                pst.setString(1, surname);
-                pst.setString(2, name);
-                pst.setString(3, patronymic);
-                int rowCount = pst.executeUpdate();
-
-                if (rowCount > 0) {
-                    JOptionPane.showMessageDialog(null, "Куратора видалено успішно");
-                    loadCurators(); 
-                } else {
-                    JOptionPane.showMessageDialog(null, "Невдалося видалити куратора");
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Помилка бази даних: " + e.getMessage());
-            }
-        } else {
+        if (selectedRow == -1) {
             JOptionPane.showMessageDialog(null, "Будь ласка, виберіть куратора для видалення");
+            return;
         }
-    }
 
-    public void loadCurators() {
+        String surname = table.getValueAt(selectedRow, 0).toString(); 
+        String name = table.getValueAt(selectedRow, 1).toString(); 
+        String patronymic = table.getValueAt(selectedRow, 2).toString(); 
         try {
             Connection con = DBConnection.getConnection();
-            String sql = "SELECT surname, name, bat FROM curator";
+            String sql = "DELETE FROM curator WHERE surname = ? AND name = ? AND bat = ?";
             PreparedStatement pst = con.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
+            pst.setString(1, surname);
+            pst.setString(2, name);
+            pst.setString(3, patronymic);
+            int rowCount = pst.executeUpdate();
 
-            tableModel.setRowCount(0);
-
-            while (rs.next()) {
-                String surname = rs.getString("surname");
-                String name = rs.getString("name");
-                String patronymic = rs.getString("bat");
-                tableModel.addRow(new Object[]{surname, name, patronymic});
+            if (rowCount > 0) {
+                JOptionPane.showMessageDialog(null, "Куратора видалено успішно");
+                loadCurators(); 
+            } else {
+                JOptionPane.showMessageDialog(null, "Невдалося видалити куратора");
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Помилка завантаження кураторів: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Помилка бази даних: " + e.getMessage());
         }
     }
 
-    
     public void groupAdd() {
         String nameGroup = groupField.getText();
-        
+
+        if (nameGroup.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Будь ласка, введіть назву групи");
+            return;
+        }
+
         try {
             Connection con = DBConnection.getConnection();
             String sql = "INSERT INTO `group` (nameGroup) VALUES (?)"; 
@@ -262,6 +242,7 @@ public class Admin extends JPanel {
 
             if (rowCount > 0) {
                 JOptionPane.showMessageDialog(null, "Групу додано");
+                loadGroups();
             } else {
                 JOptionPane.showMessageDialog(null, "Невдалося додати групу");
             }
@@ -270,55 +251,68 @@ public class Admin extends JPanel {
             JOptionPane.showMessageDialog(null, "Помилка бази даних: " + e.getMessage());
         }
     }
-    
+
     public void deleteGroup() {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow != -1) {
-            String  groupName = table.getValueAt(selectedRow, 0).toString();
-            try {
-                Connection con = DBConnection.getConnection();
-                String sql = "DELETE FROM group WHERE nameGroup = ?";
-                PreparedStatement pst = con.prepareStatement(sql);
-                pst.setString(1, groupName);
-
-                int rowCount = pst.executeUpdate();
-
-                if (rowCount > 0) {
-                    JOptionPane.showMessageDialog(null, "Видалення групи");
-                    loadCurators(); 
-                } else {
-                    JOptionPane.showMessageDialog(null, "Невдалося видалити групу");
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Помилка бази даних: " + e.getMessage());
-            }
-        } else {
+        int selectedRow = groupTable.getSelectedRow();
+        if (selectedRow == -1) {
             JOptionPane.showMessageDialog(null, "Будь ласка, виберіть групу для видалення");
+            return;
         }
-    }
-    
-    public void loadGroups() {
+
+        String groupName = groupTable.getValueAt(selectedRow, 0).toString(); 
         try {
             Connection con = DBConnection.getConnection();
-            String sql = "SELECT nameGroup FROM `group`";
+            String sql = "DELETE FROM `group` WHERE nameGroup = ?";
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setString(1, groupName);
+
+            int rowCount = pst.executeUpdate();
+
+            if (rowCount > 0) {
+                JOptionPane.showMessageDialog(null, "Групу видалено успішно");
+                loadGroups();
+            } else {
+                JOptionPane.showMessageDialog(null, "Невдалося видалити групу");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Помилка бази даних: " + e.getMessage());
+        }
+    }
+
+    private void loadCurators() {
+        tableModel.setRowCount(0);
+        try {
+            Connection con = DBConnection.getConnection();
+            String sql = "SELECT * FROM curator";
             PreparedStatement pst = con.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
 
-            groupTableModel.setRowCount(0); 
-
             while (rs.next()) {
-                String groupName = rs.getString("nameGroup");
-                groupTableModel.addRow(new Object[]{groupName});  
+                String surname = rs.getString("surname");
+                String name = rs.getString("name");
+                String patronymic = rs.getString("bat");
+                tableModel.addRow(new Object[]{surname, name, patronymic});
             }
-
-            rs.close();
-            pst.close();
-            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Помилка при завантаженні груп: " + e.getMessage());
         }
     }
 
+    private void loadGroups() {
+        groupTableModel.setRowCount(0);
+        try {
+            Connection con = DBConnection.getConnection();
+            String sql = "SELECT * FROM `group`";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                String groupName = rs.getString("nameGroup");
+                groupTableModel.addRow(new Object[]{groupName});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
