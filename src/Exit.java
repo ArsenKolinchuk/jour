@@ -58,25 +58,25 @@ class Exit extends JPanel {
         loginButton.setBounds(284, 143, 150, 30);
         centerPanel.add(loginButton);
 
-        // Add action listener for login button
+      
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String email = emailField.getText();
                 String password = new String(passwordField.getPassword());
 
-                // Check if credentials match
+                
                 if (email.equals("admin") && password.equals("admin")) {
-                    // Open the admin panel
+                    
                     JFrame adminFrame = new JFrame("Admin Panel");
                     adminFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    adminFrame.getContentPane().add(new Admin()); // Assuming you have an AdminPanel class
+                    adminFrame.getContentPane().add(new Admin()); 
                     adminFrame.setSize(820, 600);
                     adminFrame.setVisible(true);
-                    // Close the login window
+                    
                     SwingUtilities.getWindowAncestor(Exit.this).dispose();
                 } else {
-                    // Show error message
+                    
                     JOptionPane.showMessageDialog(Exit.this, "Неправильний логін або пароль.", "Помилка", JOptionPane.ERROR_MESSAGE);
                 }
             }
